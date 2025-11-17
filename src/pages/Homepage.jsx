@@ -1,37 +1,124 @@
-import React from "react";
-import { toast } from "react-toastify";
+import React, { useEffect, useState, useRef } from "react";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { useDarkMode } from "../context/DarkModeContext.jsx";
+
+const STORAGE_KEY = "ai_routine_classes_v1";
+const WEEK_DAYS = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+
+function timeToMinutes(t){ const [hh,mm]=t.split(":").map(Number); return hh*60+mm;}
+function minutesToTime(mins){const hh=Math.floor(mins/60).toString().padStart(2,"0"); const mm=(mins%60).toString().padStart(2,"0"); return `${hh}:${mm}`;}
 
 const Homepage = () => {
-  const handleNotify = () => {
-    toast.success("🎉 You’ll be notified when the homepage is ready!", {
-      position: "top-center",
-      autoClose: 3000,
-      theme: "colored",
-    });
-  };
+  const { darkMode } = useDarkMode();
+  const [classes, setClasses] = useState([]);
+  const [form, setForm] = useState({
+    subject: "",
+    teacher: "",
+    room: "",
+    day: WEEK_DAYS[new Date().getDay()],
+    time: "09:00",
+    duration: 60,
+  });
+  const remindedRef = useRef({});
+
+  useEffect(() => {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(raw){ try{ setClasses(JSON.parse(raw)) }catch{ setClasses([]); }}
+  }, []);
+
+  useEffect(()=>{ localStorage.setItem(STORAGE_KEY, JSON.stringify(classes)) }, [classes]);
+
+  useEffect(()=>{ const interval=setInterval(checkReminders,30000); checkReminders(); return ()=>clearInterval(interval); },[classes]);
+
+  function checkReminders(){
+    const now=new Date();
+    const todayName=WEEK_DAYS[now.getDay()];
+    const currentMinutes=now.getHours()*60+now.getMinutes();
+    const todays=classes.filter(c=>c.day===todayName).map(c=>({...c,startMins:timeToMinutes(c.time),endMins:timeToMinutes(c.time)+Number(c.duration||60)})).sort((a,b)=>a.startMins-b.startMins);
+    const next=todays.find(c=>c.startMins>currentMinutes);
+    if(next && !remindedRef.current[next.id]){
+      const minsUntil=next.startMins-currentMinutes;
+      if(minsUntil<=20 && minsUntil>=10){ remindedRef.current[next.id]=true; toast.info(`⏳ Next class "${next.subject}" in ${minsUntil} minutes (${next.time})`, {position:"top-right", autoClose:8000}); }
+    }
+  }
+
+  const handleChange=e=>{ const {name,value}=e.target; setForm(s=>({...s,[name]:value})); };
+  const addClass=e=>{ e.preventDefault(); if(!form.subject.trim()||!form.time){toast.warn("Provide subject and time"); return;} const newItem={id:`${Date.now()}-${Math.floor(Math.random()*10000)}`, subject:form.subject.trim(), teacher:form.teacher.trim(), room:form.room.trim(), day:form.day, time:form.time, duration:Number(form.duration)||60}; setClasses(prev=>[...prev,newItem]); setForm(s=>({...s,subject:"",teacher:"",room:""})); toast.success("Class added"); };
+  const removeClass=id=>{ if(!window.confirm("Delete this class?")) return; setClasses(prev=>prev.filter(c=>c.id!==id)); toast.success("Removed"); };
+
+  const now=new Date();
+  const todayName=WEEK_DAYS[now.getDay()];
+  const currentMinutes=now.getHours()*60+now.getMinutes();
+  const todaysClasses=classes.filter(c=>c.day===todayName).map(c=>({...c,startMins:timeToMinutes(c.time),endMins:timeToMinutes(c.time)+Number(c.duration||60)})).sort((a,b)=>a.startMins-b.startMins);
+  const ongoing=todaysClasses.find(c=>currentMinutes>=c.startMins && currentMinutes<c.endMins);
+  const nextClass=todaysClasses.find(c=>c.startMins>currentMinutes);
 
   return (
-    <div className="min-h-screen flex flex-col justify-center items-center bg-gradient-to-br from-purple-300 via-purple-500 to-purple-300 text-center">
-      <h1 className="text-5xl md:text-6xl font-bold text-white animate-bounce drop-shadow-lg">
-        🚀 Homepage is Coming Soon
-      </h1>
+    <div className={`min-h-screen flex flex-col items-center p-6 transition-colors ${darkMode?"bg-gradient-to-br from-[#0f172a] via-[#071126] to-[#061226] text-white":"bg-gradient-to-br from-purple-300 via-purple-500 to-purple-300 text-black"}`}>
+      <ToastContainer />
+      <header className="w-full max-w-4xl mb-6">
+        <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight">AI_Routine_Maker</h1>
+        <p className="text-sm opacity-75 mt-1">Manage your class routine — dark-cool UI with reminders & local save.</p>
+      </header>
 
-      <p className="mt-5 text-lg text-white/90 animate-pulse">
-        Stay tuned! We’re crafting something amazing for you ✨
-      </p>
+      <main className="w-full max-w-4xl grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* Add Class */}
+        <section className="md:col-span-1 p-4 rounded-2xl backdrop-blur-sm border border-white/6">
+          <h2 className="font-semibold text-xl mb-3">Add Class</h2>
+          <form onSubmit={addClass} className="space-y-3">
+            <input name="subject" value={form.subject} onChange={handleChange} placeholder="Subject" className="input input-bordered w-full bg-transparent" required />
+            <input name="teacher" value={form.teacher} onChange={handleChange} placeholder="Teacher (optional)" className="input input-bordered w-full bg-transparent" />
+            <input name="room" value={form.room} onChange={handleChange} placeholder="Room (optional)" className="input input-bordered w-full bg-transparent" />
+            <div className="flex gap-2">
+              <select name="day" value={form.day} onChange={handleChange} className="select select-bordered flex-1 bg-transparent">{WEEK_DAYS.map(d=><option key={d} value={d}>{d}</option>)}</select>
+              <input name="time" type="time" value={form.time} onChange={handleChange} className="input input-bordered w-32 bg-transparent" required/>
+            </div>
+            <div className="flex gap-2">
+              <input name="duration" value={form.duration} onChange={handleChange} type="number" min="5" className="input input-bordered w-32 bg-transparent" placeholder="Duration (min)" />
+              <button type="submit" className="btn btn-primary flex-1">Add Class</button>
+            </div>
+          </form>
+        </section>
 
-      <div className="mt-10">
-        <button
-          onClick={handleNotify}
-          className="btn btn-outline btn-accent animate-[pulse_2s_infinite]"
-        >
-          Notify Me
-        </button>
-      </div>
+        {/* Today's Routine */}
+        <section className="md:col-span-2 p-4 rounded-2xl backdrop-blur-sm border border-white/6">
+          <div className="flex justify-between items-start">
+            <div>
+              <h2 className="text-xl font-semibold">Today's Routine</h2>
+              <div className="text-sm opacity-70 mt-1">{todayName}</div>
+            </div>
+            <div className="text-right">
+              {ongoing ? <div className="badge badge-success badge-lg">Ongoing: {ongoing.subject}</div> : nextClass ? <div className="badge badge-warning badge-lg">Next: {nextClass.subject} at {nextClass.time}</div> : <div className="badge badge-ghost">No more classes</div>}
+            </div>
+          </div>
 
-      <div className="absolute bottom-6 text-white text-sm animate-pulse">
-        Developed by <span className="font-bold">Utsho 💎</span>
-      </div>
+          <div className="mt-4 space-y-3">
+            {todaysClasses.length===0 ? <div className="p-6 rounded-lg border border-white/6 text-center opacity-70">No classes for today.</div> : todaysClasses.map(c=>{
+              const isOngoing=currentMinutes>=c.startMins && currentMinutes<c.endMins;
+              const isUpcoming=c.startMins>currentMinutes;
+              return (
+                <div key={c.id} className={`p-3 rounded-lg flex justify-between items-center border ${isOngoing?"bg-gradient-to-r from-[#07324a] to-[#0b394e] border-primary":"bg-transparent border-white/5"}`}>
+                  <div>
+                    <div className="flex items-baseline gap-3">
+                      <div className="text-lg font-medium">{c.subject}</div>
+                      <div className="text-xs opacity-60">• {c.teacher || "—"}</div>
+                      <div className="ml-2 text-xs opacity-50">({c.room || "Room"})</div>
+                    </div>
+                    <div className="text-sm opacity-70 mt-1">{c.time} • {c.duration} min • ends {minutesToTime(c.endMins)}</div>
+                  </div>
+                  <div className="flex flex-col items-end gap-2">
+                    <div className="flex gap-2">
+                      <button onClick={()=>{navigator.clipboard?.writeText(`${c.subject} — ${c.time} (${c.duration}m) — ${c.room} — ${c.teacher}`);toast.success("Copied")}} className="btn btn-xs btn-ghost">Copy</button>
+                      <button onClick={()=>removeClass(c.id)} className="btn btn-xs btn-outline btn-error">Delete</button>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      </main>
     </div>
   );
 };
