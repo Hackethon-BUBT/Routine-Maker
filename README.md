@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # 🔥 Firebase Fighter
 
 [Live Demo 🚀](https://firebase-fighter.netlify.app/)
@@ -44,3 +45,6 @@ VITE_appId=your_app_id
 ## 4. Run the development server
 npm run dev
 
+=======
+# AI_Routine_Maker
+>>>>>>> 5812cdefd094cb6f9e9065710a5bc63ff1de16e8
