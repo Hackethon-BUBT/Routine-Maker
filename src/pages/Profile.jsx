@@ -1,36 +1,68 @@
-import React from "react";
+import React, { useContext } from "react";
 import { toast } from "react-toastify";
+import { AuthContext } from "../context/AuthContext";
+import { useDarkMode } from "../context/DarkModeContext.jsx";
+import { signOut } from "firebase/auth";
+import { Link } from "react-router-dom";
 
 const Profile = () => {
-  const handleNotify = () => {
-    toast.success("🎉 You’ll be notified when the profile is ready!", {
-      position: "top-center",
-      autoClose: 3000,
-      theme: "colored",
-    });
+  const { user, auth, setUser } = useContext(AuthContext);
+  const { darkMode } = useDarkMode();
+
+  const handleSignout = async () => {
+    try {
+      await signOut(auth);
+      setUser(null);
+      toast.success("👋 Signed out successfully");
+    } catch (error) {
+      toast.error(error.message);
+    }
   };
 
   return (
-    <div className="min-h-screen flex flex-col justify-center items-center bg-gradient-to-br from-purple-300 via-purple-500 to-purple-300 text-center">
-      <h1 className="text-5xl md:text-6xl font-bold text-white animate-bounce drop-shadow-lg">
-        🚀 Profile is Coming Soon
-      </h1>
+    <div
+      className={`min-h-screen flex flex-col items-center justify-center p-6 transition-colors duration-300 relative ${
+        darkMode
+          ? "bg-gradient-to-br from-[#0a0f24] via-[#16233b] to-[#0c1224] text-white"
+          : "bg-gradient-to-br from-purple-200 via-purple-300 to-purple-200 text-black"
+      }`}
+    >
+      {/* Profile Card */}
+      <div
+        className={`shadow-xl rounded-3xl p-8 w-full max-w-lg text-center backdrop-blur-md transition-all duration-500 border ${
+          darkMode
+            ? "bg-white/10 border-white/20"
+            : "bg-white/60 border-black/10"
+        }`}
+      >
+        <img
+          src={user?.photoURL || "https://via.placeholder.com/100"}
+          alt="Profile"
+          className="w-32 h-32 mx-auto rounded-full border-4 shadow-lg object-cover"
+        />
 
-      <p className="mt-5 text-lg text-white/90 animate-pulse">
-        Stay tuned! We’re crafting something amazing for you ✨
-      </p>
+        <h2 className="text-3xl font-bold mt-4 bg-gradient-to-r from-pink-400 to-purple-400 bg-clip-text text-transparent">
+          {user?.displayName || "Guest User"}
+        </h2>
+        <p className="opacity-80 mt-1">{user?.email || "No email available"}</p>
 
-      <div className="mt-10">
-        <button
-          onClick={handleNotify}
-          className="btn btn-outline btn-accent animate-[pulse_2s_infinite]"
-        >
-          Notify Me
-        </button>
+        <div className="mt-6 flex justify-center gap-3">
+          <Link to="/ProfileEdit">
+            <button className="px-4 py-2 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-md hover:scale-105 transition-transform">
+              ✏️ Edit Profile
+            </button>
+          </Link>
+          <button
+            onClick={handleSignout}
+            className="px-4 py-2 rounded-xl bg-red-500 text-white shadow-md hover:scale-105 transition-transform"
+          >
+            🚪 Sign Out
+          </button>
+        </div>
       </div>
 
-      <div className="absolute bottom-6 text-white text-sm animate-pulse">
-        Developed by <span className="font-bold">Utsho 💎</span>
+      <div className="absolute bottom-4 text-sm opacity-70">
+        Developed by <span className="font-bold">Red_Coders 💎</span>
       </div>
     </div>
   );

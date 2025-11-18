@@ -25,11 +25,11 @@ const AboutUs = () => {
       <ToastContainer />
 
       <h1 className="text-5xl md:text-6xl font-bold animate-bounce drop-shadow-lg">
-        🚀 About AI_Routine_Maker
+        🚀 About Routine_Maker
       </h1>
 
       <p className="mt-5 text-lg opacity-90 max-w-2xl animate-pulse">
-        AI_Routine_Maker is a smart and simple Class Routine Manager built for students. 
+        Routine_Maker is a smart and simple Class Routine Manager built for students. 
         It allows you to:
       </p>
 

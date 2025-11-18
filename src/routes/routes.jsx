@@ -1,11 +1,12 @@
-import { createBrowserRouter } from "react-router";
-import MainLayout from "../layout/MainLayout";
-import Homepage from "../pages/Homepage";
-import AboutUs from "../pages/AboutUs";
-import Profile from "../pages/Profile";
-import Signup from "../pages/Signup";
-import Signin from "../pages/Signin";
-import PrivateRoute from "../privateRoute/PrivateRoute";
+import { createBrowserRouter } from "react-router-dom"; // ✅ use react-router-dom
+import MainLayout from "../layout/MainLayout.jsx";
+import Homepage from "../pages/Homepage.jsx";
+import AboutUs from "../pages/AboutUs.jsx";
+import Profile from "../pages/Profile.jsx";
+import ProfileEdit from "../pages/ProfileEdit.jsx"; // ✅ new edit page
+import Signup from "../pages/Signup.jsx";
+import Signin from "../pages/Signin.jsx";
+import PrivateRoute from "../privateRoute/PrivateRoute.jsx";
 
 export const router = createBrowserRouter([
   {
@@ -17,11 +18,11 @@ export const router = createBrowserRouter([
         element: <Homepage />,
       },
       {
-        path: "/about-us",
+        path: "about-us",
         element: <AboutUs />,
       },
       {
-        path: "/profile",
+        path: "profile",
         element: (
           <PrivateRoute>
             <Profile />
@@ -29,11 +30,19 @@ export const router = createBrowserRouter([
         ),
       },
       {
-        path: "/signup",
+        path: "ProfileEdit", // ✅ added route
+        element: (
+          <PrivateRoute>
+            <ProfileEdit />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "signup",
         element: <Signup />,
       },
       {
-        path: "/signin",
+        path: "signin",
         element: <Signin />,
       },
     ],

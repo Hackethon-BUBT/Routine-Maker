@@ -17,11 +17,11 @@ const Homepage = () => {
     teacher: "",
     room: "",
     day: WEEK_DAYS[new Date().getDay()],
-    time: "09:00",
-    duration: 60 ,
+    time: "08:00",
+    duration: 60,
     remindBefore: 10,
   });
-  const [viewAllWeek, setViewAllWeek] = useState(false); // toggle for today / all week
+  const [viewAllWeek, setViewAllWeek] = useState(false);
   const remindedRef = useRef({});
 
   useEffect(() => {
@@ -114,7 +114,7 @@ const Homepage = () => {
       <ToastContainer />
       <header className="w-full max-w-5xl mb-6 flex justify-between items-center">
         <div>
-          <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight">AI_Routine_Maker</h1>
+          <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight">Routine_Maker</h1>
           <p className={`text-sm mt-1 ${darkMode?"text-white/70":"text-black/70"}`}>Manage your class routine — reminders & local save.</p>
         </div>
         <button 
@@ -125,55 +125,132 @@ const Homepage = () => {
         </button>
       </header>
 
-      <main className="w-full max-w-5xl grid grid-cols-1 md:grid-cols-3 gap-6">
+      <main className="w-full max-w-5xl grid grid-cols-1 md:grid-cols-3 gap-8">
         {/* Add Class */}
-        <section className={`md:col-span-1 p-4 rounded-2xl backdrop-blur-sm border ${darkMode?"border-white/10":"border-black/10"}`}>
-          <h2 className="font-semibold text-xl mb-3">Add Class</h2>
-          <form onSubmit={addClass} className="space-y-3">
-            <input name="subject" value={form.subject} onChange={handleChange} placeholder="Subject" className={`input input-bordered w-full ${darkMode?"bg-white/10 text-white placeholder-white/50":"bg-white text-black placeholder-gray-500"}`} required />
-            <input name="teacher" value={form.teacher} onChange={handleChange} placeholder="Teacher (optional)" className={`input input-bordered w-full ${darkMode?"bg-white/10 text-white placeholder-white/50":"bg-white text-black placeholder-gray-500"}`} />
-            <input name="room" value={form.room} onChange={handleChange} placeholder="Room (optional)" className={`input input-bordered w-full ${darkMode?"bg-white/10 text-white placeholder-white/50":"bg-white text-black placeholder-gray-500"}`} />
-            <div className="flex gap-2">
-              <select name="day" value={form.day} onChange={handleChange} className={`select select-bordered flex-1 ${darkMode?"bg-white/10 text-white":"bg-white text-black"}`}>
-                {WEEK_DAYS.map(d=><option key={d} value={d} className={`${darkMode?"bg-[#0f172a] text-white":"bg-white text-black"}`}>{d}</option>)}
-              </select>
-              <input name="time" type="time" value={form.time} onChange={handleChange} className={`input input-bordered w-32 ${darkMode?"bg-white/10 text-white":"bg-white text-black"}`} required/>
+        <section className={`md:col-span-1 p-6 rounded-2xl backdrop-blur-sm border transition-colors duration-300 ${darkMode?"border-white/10":"border-black/10"}`}>
+          <h2 className="font-semibold text-xl mb-6">Add Class</h2>
+          <form onSubmit={addClass} className="space-y-5">
+            {/* Subject */}
+            <div className="flex flex-col">
+              <label className="text-sm opacity-70 mb-2">Subject</label>
+              <input
+                name="subject"
+                value={form.subject}
+                onChange={handleChange}
+                placeholder="Enter subject"
+                className={`input input-bordered w-full py-3 h-12 text-lg ${darkMode?"bg-white/10 text-white placeholder-white/50":"bg-white text-black placeholder-gray-500"}`}
+                required
+              />
             </div>
-            <div className="flex gap-2">
-              <input name="duration" value={form.duration} onChange={handleChange} type="number" min="5" className={`input input-bordered w-32 ${darkMode?"bg-white/10 text-white":"bg-white text-black"}`} placeholder="Duration (min)" />
-              <input name="remindBefore" value={form.remindBefore} onChange={handleChange} type="number" min="1" className={`input input-bordered w-32 ${darkMode?"bg-white/10 text-white":"bg-white text-black"}`} placeholder="Remind before (min)" />
-              <button type="submit" className="btn btn-primary flex-1">Add Class</button>
+
+            {/* Teacher */}
+            <div className="flex flex-col">
+              <label className="text-sm opacity-70 mb-2">Teacher</label>
+              <input
+                name="teacher"
+                value={form.teacher}
+                onChange={handleChange}
+                placeholder="Teacher (optional)"
+                className={`input input-bordered w-full py-3 h-12 text-lg ${darkMode?"bg-white/10 text-white placeholder-white/50":"bg-white text-black placeholder-gray-500"}`}
+              />
+            </div>
+
+            {/* Room */}
+            <div className="flex flex-col">
+              <label className="text-sm opacity-70 mb-2">Room</label>
+              <input
+                name="room"
+                value={form.room}
+                onChange={handleChange}
+                placeholder="Room (optional)"
+                className={`input input-bordered w-full py-3 h-12 text-lg ${darkMode?"bg-white/10 text-white placeholder-white/50":"bg-white text-black placeholder-gray-500"}`}
+              />
+            </div>
+
+            {/* Grid: Day, Time, Duration */}
+            <div className="grid grid-cols-1 md:grid-cols-1 gap-1">
+              <div className="flex flex-col">
+                <label className="text-sm opacity-70 mb-2">Day</label>
+                <select 
+                  name="day" 
+                  value={form.day} 
+                  onChange={handleChange} 
+                  className={`select select-bordered w-full h-12 text-lg ${darkMode?"bg-white/10 text-white":"bg-white text-black"}`}
+                >
+                  {WEEK_DAYS.map(d=><option key={d} value={d} className={`${darkMode?"bg-[#0f172a] text-white":"bg-white text-black"}`}>{d}</option>)}
+                </select>
+              </div>
+
+              <div className="flex flex-col">
+                <label className="text-sm opacity-70 mb-2">Time</label>
+                <input 
+                  name="time" 
+                  type="time" 
+                  value={form.time} 
+                  onChange={handleChange} 
+                  className={`input input-bordered w-full h-12 text-lg ${darkMode?"bg-white/10 text-white":"bg-white text-black"}`} 
+                  required
+                />
+              </div>
+
+              <div className="flex flex-col">
+                <label className="text-sm opacity-70 mb-2">Duration (min)</label>
+                <input 
+                  name="duration" 
+                  value={form.duration} 
+                  onChange={handleChange} 
+                  type="number" 
+                  min="5" 
+                  className={`input input-bordered w-full h-12 text-lg ${darkMode?"bg-white/10 text-white":"bg-white text-black"}`} 
+                  placeholder="Duration"
+                />
+              </div>
+            </div>
+
+            {/* Remind Before + Add Button */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
+              <div className="flex flex-col">
+                <label className="text-sm opacity-70 mb-2">Remind Before (min)</label>
+                <input 
+                  name="remindBefore" 
+                  type="number" 
+                  min="1" 
+                  value={form.remindBefore} 
+                  onChange={handleChange} 
+                  className={`input input-bordered w-full h-12 text-lg ${darkMode?"bg-white/10 text-white":"bg-white text-black"}`} 
+                  placeholder="Remind before"
+                />
+              </div>
+              <button type="submit" className="btn btn-primary w-full md:col-span-2 py-3 text-lg h-12">Add Class</button>
             </div>
           </form>
         </section>
 
-        {/* Classes view */}
-        <section className={`md:col-span-2 p-4 rounded-2xl backdrop-blur-sm border ${darkMode?"border-white/10":"border-black/10"}`}>
-          <h2 className="text-xl font-semibold mb-3">{viewAllWeek ? "All Week Classes" : "Today's Classes"}</h2>
+        {/* Classes View */}
+        <section className={`md:col-span-2 p-6 rounded-2xl backdrop-blur-sm border ${darkMode?"border-white/10":"border-black/10"}`}>
+          <h2 className="text-xl font-semibold mb-4">{viewAllWeek ? "All Week Classes" : "Today's Classes"}</h2>
           <div className="space-y-4">
             {(viewAllWeek ? classesByDay : [{day:todayName, classes:todaysClasses}]).map(dayGroup=>{
               return (
-                <div key={dayGroup.day} className="space-y-2">
+                <div key={dayGroup.day} className="space-y-3">
                   {viewAllWeek && <h3 className={`font-semibold ${dayGroup.day===todayName?"text-primary":"opacity-80"}`}>{dayGroup.day}</h3>}
                   {dayGroup.classes.length===0 ? (
-                    <div className={`p-3 rounded-lg border ${darkMode?"border-white/10 text-white/70":"border-black/10 text-black/70"}`}>No classes</div>
+                    <div className={`p-4 rounded-lg border ${darkMode?"border-white/10 text-white/70":"border-black/10 text-black/70"}`}>No classes</div>
                   ) : (
                     dayGroup.classes.map(c=>{
                       const isToday = c.day===todayName;
                       const isOngoing = isToday && currentMinutes>=c.startMins && currentMinutes<c.endMins;
                       return (
-                        <div key={c.id} className={`p-3 rounded-lg flex justify-between items-center border transition-colors duration-300 ${isOngoing?"bg-gradient-to-r from-[#07324a] to-[#0b394e] border-primary":`bg-transparent ${darkMode?"border-white/5":"border-black/10"}`}`}>
+                        <div key={c.id} className={`p-4 rounded-lg flex justify-between items-center border transition-colors duration-300 ${isOngoing?"bg-gradient-to-r from-[#07324a] to-[#0b394e] border-primary":`bg-transparent ${darkMode?"border-white/5":"border-black/10"}`}`}>
                           <div>
-                            <div className="flex items-baseline gap-2">
-                              <div className="font-medium">{c.subject}</div>
-                              <div className="text-xs opacity-60">• {c.teacher || "—"}</div>
-                              <div className="ml-2 text-xs opacity-50">({c.room || "Room"})</div>
+                            <div className="flex items-baseline gap-3">
+                              <div className="font-medium text-lg">{c.subject}</div>
+                              <div className="text-sm opacity-60">• {c.teacher || "—"}</div>
+                              <div className="ml-2 text-sm opacity-50">({c.room || "Room"})</div>
                             </div>
-                            <div className="text-sm opacity-70 mt-1">
-                              {c.time} - {minutesToTime(c.endMins)} ({c.duration} min)
-                            </div>
+                            <div className="text-sm opacity-70 mt-1">{c.time} - {minutesToTime(c.endMins)} ({c.duration} min)</div>
                           </div>
-                          <div className="flex gap-2">
+                          <div className="flex gap-3">
                             <button onClick={()=>{ navigator.clipboard?.writeText(`${c.subject} — ${c.time} (${c.duration}m) — ${c.room} — ${c.teacher}`); toast.success("Copied") }} className="btn btn-xs btn-ghost">Copy</button>
                             <button onClick={()=>removeClass(c.id)} className="btn btn-xs btn-outline btn-error">Delete</button>
                           </div>
