@@ -52,7 +52,15 @@ const AboutUs = () => {
       </div>
 
       <div className="absolute bottom-6 text-sm animate-pulse">
-        Developed by <span className="font-bold">Red_Coders 💎</span>
+        Developed by{" "}
+        <a
+          href="https://github.com/Hackethon-BUBT"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="font-bold text-blue-400 hover:underline"
+        >
+          Red_Coders 💎
+        </a>
       </div>
     </div>
   );
